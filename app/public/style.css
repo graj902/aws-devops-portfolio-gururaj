@@ -1,12 +1,10 @@
+/* --- Google Font Import --- */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
 
+/* --- Base & Mobile-First Styles --- */
 body {
     font-family: 'Roboto', sans-serif;
     background: linear-gradient(to right, #2c3e50, #4ca1af);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
     margin: 0;
     padding: 20px;
     box-sizing: border-box;
@@ -15,16 +13,17 @@ body {
 .card {
     background-color: white;
     border-radius: 15px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    max-width: 700px;
-    width: 100%;
-    padding: 40px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    padding: 30px;
     text-align: center;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
 }
 
 .profile-pic {
-    width: 150px;
-    height: 150px;
+    width: 130px;
+    height: 130px;
     border-radius: 50%;
     object-fit: cover;
     border: 5px solid #4ca1af;
@@ -34,7 +33,7 @@ body {
 h1 {
     margin: 0;
     font-weight: 700;
-    font-size: 2.5em;
+    font-size: 2.1em;
 }
 
 h2 {
@@ -54,7 +53,7 @@ h2 {
     border-bottom: 2px solid #eee;
     padding-bottom: 5px;
     margin-bottom: 15px;
-    font-size: 1.4em;
+    font-size: 1.3em;
 }
 
 .content p {
@@ -66,6 +65,7 @@ h2 {
     list-style: none;
     padding: 0;
     margin-top: 10px;
+    text-align: center;
 }
 
 .skills li {
@@ -83,55 +83,49 @@ h2 {
     margin-top: 30px;
     font-size: 0.9em;
     color: #777;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px 10px;
 }
 
 .contact a {
     color: #4ca1af;
     text-decoration: none;
+    white-space: nowrap;
 }
 
 .contact a:hover {
     text-decoration: underline;
 }
-/* --- Add this block for Mobile Responsiveness --- */
 
-@media (max-width: 768px) {
+/* --- Desktop Styles (for screens wider than 768px) --- */
+@media (min-width: 768px) {
     body {
-        /* Remove rigid centering to allow scrolling on small screens */
-        display: block;
-        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
     }
 
     .card {
-        /* Make the card take up the full width with a small margin */
-        max-width: 100%;
-        width: auto;
-        margin: 20px;
-        padding: 25px;
-        border-radius: 10px; /* Slightly smaller radius for small screens */
-        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        padding: 40px;
     }
 
     .profile-pic {
-        width: 120px;
-        height: 120px;
+        width: 150px;
+        height: 150px;
     }
 
     h1 {
-        font-size: 2em; /* Decrease font size for h1 */
+        font-size: 2.5em;
     }
 
-    h2 {
-        font-size: 1.1em; /* Decrease font size for h2 */
+    .skills ul {
+        text-align: left;
     }
 
-    .content h3 {
-        font-size: 1.2em; /* Decrease font size for content headers */
-    }
-
-    .skills li {
-        /* Make skill tags slightly smaller */
-        font-size: 0.8em;
-        padding: 6px 12px;
+    .contact {
+        flex-wrap: nowrap;
     }
 }
