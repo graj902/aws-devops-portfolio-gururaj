@@ -1,0 +1,116 @@
+# /.github/workflows/ci-cd.yml
+
+name: CI/CD Pipeline for Portfolio
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  PROJECT_NAME: gururaj-portfolio
+  AWS_REGION: ap-south-1
+
+permissions:
+  id-token: write # Required for assuming IAM role via OIDC
+  contents: read
+
+jobs:
+  # -----------------------------------------------------------------
+  # BUILD, TEST & PUSH DOCKER IMAGE
+  # -----------------------------------------------------------------
+  build-and-push:
+    name: Build and Push to ECR
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.get-image-tag.outputs.IMAGE_TAG }}
+      ecr_repository_url: ${{ steps.terraform-output.outputs.ecr_repository_url }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        id: init
+        working-directory: ./infrastructure
+        run: terraform init
+
+      - name: Terraform Workspace
+        id: workspace
+        working-directory: ./infrastructure
+        run: terraform workspace select default || terraform workspace new default
+
+      - name: Get ECR URL from Terraform Output
+        id: terraform-output
+        working-directory: ./infrastructure
+        run: |
+          ECR_URL=$(terraform output -raw ecr_repository_url)
+          echo "ecr_repository_url=${ECR_URL}" >> $GITHUB_OUTPUT
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Generate Image Tag
+        id: get-image-tag
+        run: |
+          IMAGE_TAG=$(date +'%Y%m%d%H%M%S')-${GITHUB_SHA::7}
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        working-directory: ./app
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.PROJECT_NAME }}
+          IMAGE_TAG: ${{ steps.get-image-tag.outputs.IMAGE_TAG }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+  # -----------------------------------------------------------------
+  # DEPLOY TO EKS CLUSTER
+  # -----------------------------------------------------------------
+  deploy-to-eks:
+    name: Deploy to EKS
+    runs-on: ubuntu-latest
+    needs: build-and-push # This job depends on the previous one
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configure Kubectl
+        run: |
+          aws eks update-kubeconfig --name ${{ env.PROJECT_NAME }} --region ${{ env.AWS_REGION }}
+          kubectl config current-context
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Deploy with Helm
+        env:
+          ECR_REPOSITORY_URL: ${{ needs.build-and-push.outputs.ecr_repository_url }}
+          IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
+        run: |
+          helm upgrade --install ${{ env.PROJECT_NAME }} ./helm/gururaj-portfolio \
+            --namespace default \
+            --set image.repository=${ECR_REPOSITORY_URL} \
+            --set image.tag=${IMAGE_TAG} \
+            --wait

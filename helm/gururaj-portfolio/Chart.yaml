@@ -1,0 +1,6 @@
+apiVersion: v2
+name: gururaj-portfolio
+description: A Helm chart for deploying the Gururaj Rathod portfolio application
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

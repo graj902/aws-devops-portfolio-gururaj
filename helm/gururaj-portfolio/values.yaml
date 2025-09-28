@@ -1,0 +1,24 @@
+# Default values for gururaj-portfolio chart.
+
+replicaCount: 2
+
+image:
+  # The ECR repository URI will be injected by the CI/CD pipeline.
+  repository: ""
+  # The image tag (commit SHA) will be injected by the CI/CD pipeline.
+  tag: ""
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 8080
+
+# We are not defining resource requests and limits yet, but this is where they would go.
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi

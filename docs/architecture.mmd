@@ -1,0 +1,46 @@
+graph TD
+    subgraph "GitHub"
+        A[GitHub Repository] -->|Push to main| B(GitHub Actions CI/CD)
+    end
+
+    subgraph "AWS Account"
+        subgraph "CI/CD Pipeline Steps"
+            B -->|1. Assume Role (OIDC)| C{IAM Role}
+            B -->|2. Build & Push Image| D[ECR Repository]
+            B -->|3. Deploy| E[EKS Cluster API]
+        end
+
+        subgraph "VPC"
+            E --> F[EKS Control Plane]
+
+            subgraph "Private Subnets"
+                G[EKS Worker Nodes]
+                H[RDS PostgreSQL]
+                I[ElastiCache Redis]
+            end
+
+            subgraph "Public Subnets"
+                J[NAT Gateways]
+                K[Load Balancer]
+            end
+
+            F -- Manages --> G
+            G -- Runs --> L{App Pods}
+            L -- Accesses --> H
+            L -- Accesses --> I
+            G -- Egress via --> J
+        end
+
+        K -- Routes traffic to --> L
+        J -- Routes to --> M[Internet Gateway]
+        M -- To/From --> Internet
+    end
+
+    subgraph "End User"
+        U[User's Browser] -->|HTTPS Request| K
+    end
+
+    style ECR fill:#EC7211,stroke:#333,stroke-width:2px
+    style EKS fill:#FF9900,stroke:#333,stroke-width:2px
+    style RDS fill:#2E73B8,stroke:#333,stroke-width:2px
+    style VPC fill:#7D297D,stroke:#333,stroke-width:2px,color:#fff

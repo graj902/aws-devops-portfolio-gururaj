@@ -1,0 +1,20 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+errored.tfstate
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# General
+.DS_Store
+*.env
