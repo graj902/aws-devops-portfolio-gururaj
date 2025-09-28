@@ -40,6 +40,24 @@ resource "aws_iam_policy" "github_actions_deployer_policy" {
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
+      # Permissions for Terraform Backend S3 Bucket
+      {
+        Effect   = "Allow",
+        Action   = "s3:ListBucket",
+        Resource = "arn:aws:s3:::gururaj-portfolio-${data.aws_caller_identity.current.account_id}-tfstate"
+      },
+      {
+        Effect   = "Allow",
+        Action   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+        Resource = "arn:aws:s3:::gururaj-portfolio-${data.aws_caller_identity.current.account_id}-tfstate/global/terraform.tfstate"
+      },
+      # Permissions for Terraform Lock DynamoDB Table
+      {
+        Effect   = "Allow",
+        Action   = ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:DeleteItem"],
+        Resource = "arn:aws:dynamodb:${var.aws_region}:${data.aws_caller_identity.current.account_id}:table/gururaj-portfolio-tf-lock"
+      },
+      # Permissions for EKS and ECR
       {
         Action   = "eks:DescribeCluster",
         Effect   = "Allow",
@@ -52,10 +70,4 @@ resource "aws_iam_policy" "github_actions_deployer_policy" {
       }
     ]
   })
-}
-
-# Attach the permissions policy to the deployer role
-resource "aws_iam_role_policy_attachment" "deployer_policy_attach" {
-  role       = aws_iam_role.github_actions_deployer.name
-  policy_arn = aws_iam_policy.github_actions_deployer_policy.arn
 }
