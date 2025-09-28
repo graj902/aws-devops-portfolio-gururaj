@@ -17,10 +17,24 @@ resource "aws_iam_policy" "debug_pipeline_permissions" {
         Resource = "*"
       },
       # ECR login permission
+            // ECR permissions for login and push
       {
-        Effect   = "Allow",
-        Action   = "ecr:GetAuthorizationToken",
-        Resource = "*"
+        "Effect": "Allow",
+        "Action": [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:GetRepositoryPolicy",
+          "ecr:DescribeRepositories",
+          "ecr:ListImages",
+          "ecr:DescribeImages",
+          "ecr:BatchGetImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload",
+          "ecr:PutImage"
+        ],
+        "Resource": "*"
       },
       # EKS describe permission for provider configuration
       {
