@@ -1,10 +1,10 @@
-# /infrastructure/auth.tf
-
-
 resource "kubernetes_config_map" "aws_auth" {
   metadata {
     name      = "aws-auth"
     namespace = "kube-system"
+    labels = {
+      "app.kubernetes.io/managed-by" = "Terraform"
+    }
   }
 
   data = {
@@ -18,9 +18,21 @@ resource "kubernetes_config_map" "aws_auth" {
         ]
       },
     ])
+    # --- ADD THIS ENTIRE mapUsers BLOCK ---
+    mapUsers = yamlencode([
+      {
+        userarn  = aws_iam_role.github_actions_deployer.arn
+        username = "github-actions-deployer"
+        groups = [
+          "system:masters" # Granting admin privileges to the deployer role
+        ]
+      }
+    ])
+    # --- END of mapUsers BLOCK ---
   }
 
   depends_on = [
-    module.eks
+    module.eks,
+    aws_iam_role.github_actions_deployer
   ]
 }
