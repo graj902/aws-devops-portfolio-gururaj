@@ -29,3 +29,7 @@ output "node_role_name" {
   description = "The name of the IAM role for the worker nodes."
   value       = aws_iam_role.node_role.name
 }
+output "node_group_asg_name" {
+  description = "The name of the Auto Scaling Group for the worker nodes."
+  value       = aws_eks_node_group.main.resources[0].autoscaling_groups[0].name
+}
