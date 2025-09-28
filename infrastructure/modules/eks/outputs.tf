@@ -25,3 +25,7 @@ output "cluster_arn" {
   description = "The ARN of the EKS cluster."
   value       = aws_eks_cluster.main.arn
 }
+output "node_role_name" {
+  description = "The name of the IAM role for the worker nodes."
+  value       = aws_iam_role.node_role.name
+}

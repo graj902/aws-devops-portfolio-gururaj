@@ -15,21 +15,42 @@ app.get('/style.css', (req, res) => {
 });
 
 app.get('/', async (req, res) => {
-  try {
-    const command = new GetParameterCommand({ Name: PARAMETER_NAME, WithDecryption: true });
-    const ssmResponse = await ssmClient.send(command);
-    const professionalSummary = ssmResponse.Parameter.Value;
+  // This is inside the app.get('/', ...) route
 
-    const htmlTemplate = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
-    const finalHtml = htmlTemplate.replace('{{PROFESSIONAL_SUMMARY}}', professionalSummary);
+try {
+  const command = new GetParameterCommand({ Name: PARAMETER_NAME, WithDecryption: true });
+  const ssmResponse = await ssmClient.send(command);
+  const professionalSummary = ssmResponse.Parameter.Value;
 
-    res.send(finalHtml);
-  } catch (err) {
-    console.error("Error processing request:", err);
-    res.status(500).send("<h1>Error</h1><p>Could not load configuration from backend services.</p>");
-  }
+  const htmlTemplate = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
+  const finalHtml = htmlTemplate.replace('{{PROFESSIONAL_SUMMARY}}', professionalSummary);
+
+  // MODIFIED: Log success as a structured JSON object
+  console.log(JSON.stringify({
+      level: "info",
+      message: "Successfully rendered portfolio page",
+      path: "/",
+      statusCode: 200
+  }));
+
+  res.send(finalHtml);
+} catch (err) {
+  // MODIFIED: Log errors as a structured JSON object
+  console.error(JSON.stringify({
+      level: "error",
+      message: "Could not load configuration from backend services.",
+      errorName: err.name,
+      errorMessage: err.message,
+      stack: err.stack // Including the stack trace for better debugging
+  }));
+  res.status(500).send("<h1>Error</h1><p>Could not load configuration from backend services.</p>");
+}
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  // MODIFIED: Log the server start message as a structured JSON object
+  console.log(JSON.stringify({
+      level: "info",
+      message: `Server running on port ${PORT}`
+  }));
 });
