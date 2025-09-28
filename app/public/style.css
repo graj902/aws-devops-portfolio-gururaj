@@ -93,3 +93,45 @@ h2 {
 .contact a:hover {
     text-decoration: underline;
 }
+/* --- Add this block for Mobile Responsiveness --- */
+
+@media (max-width: 768px) {
+    body {
+        /* Remove rigid centering to allow scrolling on small screens */
+        display: block;
+        padding: 0;
+    }
+
+    .card {
+        /* Make the card take up the full width with a small margin */
+        max-width: 100%;
+        width: auto;
+        margin: 20px;
+        padding: 25px;
+        border-radius: 10px; /* Slightly smaller radius for small screens */
+        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    }
+
+    .profile-pic {
+        width: 120px;
+        height: 120px;
+    }
+
+    h1 {
+        font-size: 2em; /* Decrease font size for h1 */
+    }
+
+    h2 {
+        font-size: 1.1em; /* Decrease font size for h2 */
+    }
+
+    .content h3 {
+        font-size: 1.2em; /* Decrease font size for content headers */
+    }
+
+    .skills li {
+        /* Make skill tags slightly smaller */
+        font-size: 0.8em;
+        padding: 6px 12px;
+    }
+}
