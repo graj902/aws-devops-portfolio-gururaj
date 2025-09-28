@@ -33,6 +33,7 @@ resource "aws_iam_role" "github_actions_deployer" {
 }
 
 # This is the permissions policy for the deployer role
+# This is the permissions policy for the deployer role
 resource "aws_iam_policy" "github_actions_deployer_policy" {
   name        = "${var.project_name}-GitHubDeployerPolicy"
   description = "Permissions for the GitHub Actions deployer role"
@@ -47,8 +48,9 @@ resource "aws_iam_policy" "github_actions_deployer_policy" {
         Resource = "arn:aws:s3:::gururaj-portfolio-${data.aws_caller_identity.current.account_id}-tfstate"
       },
       {
-        Effect   = "Allow",
-        Action   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+        Effect = "Allow",
+        # CORRECTED: Added "s3:HeadObject" to the Action list
+        Action = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:HeadObject"],
         Resource = "arn:aws:s3:::gururaj-portfolio-${data.aws_caller_identity.current.account_id}-tfstate/global/terraform.tfstate"
       },
       # Permissions for Terraform Lock DynamoDB Table
