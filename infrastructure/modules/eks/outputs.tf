@@ -21,3 +21,7 @@ output "cluster_security_group_id" {
   description = "The ID of the security group created by the EKS cluster."
   value       = aws_eks_cluster.main.vpc_config[0].cluster_security_group_id
 }
+output "cluster_arn" {
+  description = "The ARN of the EKS cluster."
+  value       = aws_eks_cluster.main.arn
+}

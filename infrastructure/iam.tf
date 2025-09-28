@@ -1,15 +1,8 @@
 data "aws_caller_identity" "current" {}
 
-# This data source gets the OIDC provider certificate from GitHub
-data "tls_certificate" "github_oidc" {
+# This data source looks up the OIDC provider that already exists in the AWS account.
+data "aws_iam_openid_connect_provider" "github" {
   url = "https://token.actions.githubusercontent.com"
-}
-
-# This resource creates the trust relationship between your AWS account and GitHub Actions
-resource "aws_iam_openid_connect_provider" "github" {
-  url             = "https://token.actions.githubusercontent.com"
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [data.tls_certificate.github_oidc.certificates[0].sha1_fingerprint]
 }
 
 # This is the trust policy document for the deployer role
@@ -20,14 +13,14 @@ data "aws_iam_policy_document" "github_actions_assume_role_policy" {
 
     principals {
       type        = "Federated"
-      identifiers = [aws_iam_openid_connect_provider.github.arn]
+      identifiers = [data.aws_iam_openid_connect_provider.github.arn] # This line now correctly uses the ARN from the data source
     }
 
     # This condition ensures that only workflows from your specific repository can assume this role
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["graj902/aws-devops-portfolio-gururaj:*"]
+      values   = ["repo:graj902/aws-devops-portfolio-gururaj:*"] # Corrected the value to include "repo:"
     }
   }
 }
@@ -50,12 +43,12 @@ resource "aws_iam_policy" "github_actions_deployer_policy" {
       {
         Action   = "eks:DescribeCluster",
         Effect   = "Allow",
-        Resource = module.eks.cluster_arn # This output will be added to the EKS module next
+        Resource = module.eks.cluster_arn
       },
       {
         Action   = "ecr:GetAuthorizationToken",
         Effect   = "Allow",
-        Resource = "*" # This action does not support resource-level permissions
+        Resource = "*"
       }
     ]
   })

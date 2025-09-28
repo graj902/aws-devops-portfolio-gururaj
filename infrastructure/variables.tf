@@ -18,7 +18,7 @@ variable "db_username" {
 }
 
 variable "db_password" {
-    description = "The master password for the RDS database. Must meet complexity requirements."
+  description = "The master password for the RDS database. Must meet complexity requirements."
   type        = string
   default     = "MustBeAComplexPassword1!"
   sensitive   = true
